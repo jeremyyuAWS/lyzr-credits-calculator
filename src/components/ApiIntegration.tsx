@@ -30,11 +30,29 @@ const ApiIntegration: React.FC<ApiIntegrationProps> = ({
         units
       }));
 
+    // Create a complete payload with all calculator options
     return {
       workload_name: workloadName,
       reasoning_tier: reasoningTier,
       iterations: workload.iterations,
-      steps
+      steps,
+      calculated_results: {
+        per_iteration_credits: result.perIterationCredits,
+        total_credits: result.totalCredits,
+        total_cost_usd: result.totalCostUsd
+      },
+      breakdown: Object.entries(result.breakdown)
+        .filter(([_, details]) => details.count > 0)
+        .reduce((acc, [activity, details]) => {
+          acc[activity] = {
+            count: details.count,
+            base_credits: details.baseCredits,
+            adjusted_credits: details.adjustedCredits,
+            description: details.description
+          };
+          return acc;
+        }, {} as Record<string, any>),
+      tier_multiplier: TIER_MULTIPLIERS[reasoningTier as keyof typeof TIER_MULTIPLIERS]
     };
   };
 
