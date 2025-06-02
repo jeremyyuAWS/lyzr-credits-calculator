@@ -443,7 +443,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
                   max="10"
                   value={answers[question.id] || '3'}
                   onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                  className="w-16 p-1 border-t border-b border-gray-300 text-center"
+                  className="w-16 p-1 border-t border-b border-gray-300 text-center bg-white"
                 />
                 <button
                   type="button"
