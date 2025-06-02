@@ -559,7 +559,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
                   min="0"
                   value={answers[question.id] || '0'}
                   onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                  className="w-16 text-center p-1 border-t border-b border-gray-300"
+                  className="w-16 text-center p-1 border-t border-b border-gray-300 bg-white"
                 />
                 <button
                   type="button"
@@ -782,7 +782,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
             <textarea
               value={answers[question.id] || ''}
               onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded resize-none h-20"
+              className="w-full p-2 border border-gray-300 rounded resize-none h-20 bg-white"
               placeholder={info.placeholder || "Enter your answer..."}
             />
             {info.examples && info.examples.length > 0 && (
@@ -813,7 +813,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
           value={workloadName}
           onChange={(e) => onWorkloadNameChange(e.target.value)}
           placeholder="e.g., Customer Support Bot, Data Analysis Pipeline"
-          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors"
+          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors bg-white"
         />
       </div>
 
@@ -858,7 +858,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe what your AI will do in everyday language. For example: 'A customer service bot that answers questions about products, handles returns, and can check order status by connecting to our order database.'"
-          className="w-full p-2 border border-gray-300 rounded h-24 resize-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors"
+          className="w-full p-2 border border-gray-300 rounded h-24 resize-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors bg-white"
         />
         <AnimatePresence>
           {showSuggestionSuccess && (
@@ -965,7 +965,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
             <span>Back</span>
           </button>
         ) : (
-          <div />
+          <div></div>
         )}
         
         <button
