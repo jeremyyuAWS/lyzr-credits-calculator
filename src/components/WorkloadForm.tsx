@@ -89,7 +89,7 @@ const WorkloadForm: React.FC<WorkloadFormProps> = ({ workload, onChange }) => {
           </div>
         </div>
         <select 
-          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors"
+          className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors bg-white"
           onChange={handleUseCaseSelect}
           value=""
         >
@@ -127,7 +127,7 @@ const WorkloadForm: React.FC<WorkloadFormProps> = ({ workload, onChange }) => {
               min="1"
               value={workload.iterations}
               onChange={handleIterationsChange}
-              className="w-20 p-2 border border-gray-300 rounded text-center"
+              className="w-20 p-2 border border-gray-300 rounded text-center bg-white"
             />
           </div>
           <div className="text-sm text-gray-600">

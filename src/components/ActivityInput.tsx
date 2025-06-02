@@ -95,7 +95,7 @@ const ActivityInput: React.FC<ActivityInputProps> = ({
             min="0"
             value={count || ''}
             onChange={handleChange}
-            className="w-16 p-1 border-t border-b border-gray-300 text-center"
+            className="w-16 p-1 border-t border-b border-gray-300 text-center bg-white"
           />
           <button
             type="button"
