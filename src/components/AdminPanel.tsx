@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { CalculationResult, Workload } from '../types';
 import { TIER_MULTIPLIERS } from '../data/creditRates';
-import { Code, Copy, Send } from 'lucide-react';
+import { Code, Copy, Send, ArrowRight } from 'lucide-react';
+import { Line, Doughnut } from 'react-chartjs-2';
+import { formatNumber, formatUSD } from '../utils/calculationUtils';
+import { motion } from 'framer-motion';
 
 interface AdminPanelProps {
   workloadName: string;
@@ -19,6 +22,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<any | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showComparisonView, setShowComparisonView] = useState(false);
 
   // Generate the API request payload based on the workload
   const generateRequestPayload = () => {
@@ -120,6 +124,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           const parsedContent = JSON.parse(data.response);
           if (parsedContent && typeof parsedContent === 'object') {
             setResponse(parsedContent);
+            setShowComparisonView(true);
           } else {
             setResponse(data);
           }
@@ -138,64 +143,223 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  // Create comparison visualization data
+  const createComparisonData = () => {
+    if (!response || !response.total_credits) return null;
+    
+    // Credits comparison
+    const creditsDiff = (response.total_credits - result.totalCredits) / result.totalCredits * 100;
+    const creditsData = {
+      labels: ['Client Calculation', 'Lyzr API'],
+      datasets: [{
+        data: [result.totalCredits, response.total_credits],
+        backgroundColor: ['#8b5cf6', '#6366f1'],
+        borderWidth: 0
+      }]
+    };
+    
+    // Cost comparison
+    const costDiff = (response.total_cost_usd - result.totalCostUsd) / result.totalCostUsd * 100;
+    const costData = {
+      labels: ['Client Calculation', 'Lyzr API'],
+      datasets: [{
+        data: [result.totalCostUsd, response.total_cost_usd],
+        backgroundColor: ['#10b981', '#06b6d4'],
+        borderWidth: 0
+      }]
+    };
+    
+    return { creditsData, costData, creditsDiff, costDiff };
+  };
+
+  const comparisonData = response ? createComparisonData() : null;
+
   // Helper function to format API response for display
   const formatApiResponse = () => {
     if (!response) return null;
     
-    // Check if we have the expected JSON structure from the agent
-    if (response.per_iteration_credits !== undefined && 
-        response.total_credits !== undefined && 
-        response.total_cost_usd !== undefined) {
+    if (showComparisonView && response.per_iteration_credits !== undefined && 
+        response.total_credits !== undefined && response.total_cost_usd !== undefined) {
       return (
         <div className="bg-white rounded-lg shadow-md p-4 mt-4">
-          <h4 className="text-lg font-semibold mb-3">Lyzr API Verification</h4>
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-lg font-semibold">Verification Results</h4>
+            <button 
+              onClick={() => setShowComparisonView(false)}
+              className="text-sm text-indigo-600 hover:text-indigo-800"
+            >
+              View Raw JSON
+            </button>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Per Iteration</div>
-              <div className="text-xl font-bold">{response.per_iteration_credits} credits</div>
-            </div>
-            
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Total Credits</div>
-              <div className="text-xl font-bold">{response.total_credits} credits</div>
-              <div className="text-xs text-gray-500">
-                For {workload.iterations} iterations
+          {comparisonData && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h5 className="text-md font-medium mb-2">Credits Comparison</h5>
+                  <div className="h-48">
+                    <Doughnut 
+                      data={comparisonData.creditsData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom'
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => `${context.label}: ${formatNumber(context.raw as number)} credits`
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="mt-2 text-center">
+                    <span className={`text-sm font-medium ${
+                      Math.abs(comparisonData.creditsDiff) < 1 
+                        ? 'text-green-600' 
+                        : comparisonData.creditsDiff > 0 
+                          ? 'text-red-600' 
+                          : 'text-blue-600'
+                    }`}>
+                      {comparisonData.creditsDiff > 0 
+                        ? `+${comparisonData.creditsDiff.toFixed(2)}%` 
+                        : comparisonData.creditsDiff < 0 
+                          ? `${comparisonData.creditsDiff.toFixed(2)}%` 
+                          : 'Exact match'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div>
+                  <h5 className="text-md font-medium mb-2">Cost Comparison</h5>
+                  <div className="h-48">
+                    <Doughnut 
+                      data={comparisonData.costData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom'
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => `${context.label}: ${formatUSD(context.raw as number)}`
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="mt-2 text-center">
+                    <span className={`text-sm font-medium ${
+                      Math.abs(comparisonData.costDiff) < 1 
+                        ? 'text-green-600' 
+                        : comparisonData.costDiff > 0 
+                          ? 'text-red-600' 
+                          : 'text-blue-600'
+                    }`}>
+                      {comparisonData.costDiff > 0 
+                        ? `+${comparisonData.costDiff.toFixed(2)}%` 
+                        : comparisonData.costDiff < 0 
+                          ? `${comparisonData.costDiff.toFixed(2)}%` 
+                          : 'Exact match'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <motion.div 
+                  className="bg-white p-3 rounded-md border"
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="text-xs text-gray-500 mb-1">Per Iteration</div>
+                  <div className="flex items-center">
+                    <div className="text-base font-bold">{formatNumber(result.perIterationCredits)}</div>
+                    <ArrowRight size={12} className="mx-1 text-gray-400" />
+                    <div className="text-base font-bold">{formatNumber(response.per_iteration_credits)}</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="bg-white p-3 rounded-md border"
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                  <div className="text-xs text-gray-500 mb-1">Total Credits</div>
+                  <div className="flex items-center">
+                    <div className="text-base font-bold">{formatNumber(result.totalCredits)}</div>
+                    <ArrowRight size={12} className="mx-1 text-gray-400" />
+                    <div className="text-base font-bold">{formatNumber(response.total_credits)}</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="bg-white p-3 rounded-md border"
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
+                >
+                  <div className="text-xs text-gray-500 mb-1">Total Cost</div>
+                  <div className="flex items-center">
+                    <div className="text-base font-bold">{formatUSD(result.totalCostUsd)}</div>
+                    <ArrowRight size={12} className="mx-1 text-gray-400" />
+                    <div className="text-base font-bold">{formatUSD(response.total_cost_usd)}</div>
+                  </div>
+                </motion.div>
+              </div>
+              
+              <div className={`p-3 rounded-lg ${
+                Math.abs(comparisonData.creditsDiff) < 1
+                  ? 'bg-green-50 border border-green-100'
+                  : 'bg-yellow-50 border border-yellow-100'
+              }`}>
+                <h4 className={`text-sm font-medium mb-1 ${
+                  Math.abs(comparisonData.creditsDiff) < 1
+                    ? 'text-green-800'
+                    : 'text-yellow-800'
+                }`}>Verification Status</h4>
+                <p className={`text-xs ${
+                  Math.abs(comparisonData.creditsDiff) < 1
+                    ? 'text-green-700'
+                    : 'text-yellow-700'
+                }`}>
+                  {Math.abs(comparisonData.creditsDiff) < 1 
+                    ? 'The client-side calculation matches the Lyzr API response within expected precision. The calculator is accurate.' 
+                    : `There is a ${Math.abs(comparisonData.creditsDiff).toFixed(2)}% difference between client-side calculation and Lyzr API response. This may be due to rounding differences or calculation updates.`}
+                </p>
               </div>
             </div>
-            
-            <div className="bg-indigo-50 p-3 rounded-md">
-              <div className="text-sm text-indigo-700">Estimated Cost</div>
-              <div className="text-xl font-bold text-indigo-800">${response.total_cost_usd.toFixed(2)}</div>
-              <div className="text-xs text-indigo-600">
-                {response.total_credits} × $0.01 per credit
-              </div>
-            </div>
+          )}
+        </div>
+      );
+    } else if (response.per_iteration_credits !== undefined && 
+        response.total_credits !== undefined && 
+        response.total_cost_usd !== undefined) {
+      // Basic response view
+      return (
+        <div className="bg-white rounded-lg shadow-md p-4 mt-4">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-lg font-semibold">API Response</h4>
+            {!showComparisonView && (
+              <button 
+                onClick={() => setShowComparisonView(true)}
+                className="text-sm text-indigo-600 hover:text-indigo-800"
+              >
+                View Comparison
+              </button>
+            )}
           </div>
-          
-          <div className="flex items-center text-sm mb-2">
-            <div className={`w-3 h-3 rounded-full mr-2 ${
-              Math.abs(response.total_credits - result.totalCredits) < 0.01 
-                ? 'bg-green-500' 
-                : 'bg-yellow-500'
-            }`}></div>
-            <span>
-              {Math.abs(response.total_credits - result.totalCredits) < 0.01 
-                ? 'API result matches calculator output' 
-                : 'API result differs from calculator output'}
-            </span>
-          </div>
-          
-          <div className="mt-4">
-            <details className="text-sm">
-              <summary className="cursor-pointer text-indigo-600 hover:text-indigo-800 transition-colors duration-200">
-                View raw API response
-              </summary>
-              <pre className="mt-2 bg-gray-100 p-3 rounded overflow-auto text-xs max-h-60">
-                {JSON.stringify(response, null, 2)}
-              </pre>
-            </details>
-          </div>
+          <pre className="bg-gray-100 p-3 rounded overflow-auto text-xs max-h-[300px]">
+            {JSON.stringify(response, null, 2)}
+          </pre>
         </div>
       );
     }
@@ -204,7 +368,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     return (
       <div className="bg-white rounded-lg shadow-md p-4 mt-4">
         <h4 className="text-lg font-semibold mb-3">API Response</h4>
-        <pre className="bg-gray-100 p-3 rounded overflow-auto text-xs max-h-60">
+        <pre className="bg-gray-100 p-3 rounded overflow-auto text-xs max-h-[300px]">
           {JSON.stringify(response, null, 2)}
         </pre>
       </div>
