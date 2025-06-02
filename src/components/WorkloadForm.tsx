@@ -3,7 +3,8 @@ import { CreditActivity, Workload } from '../types';
 import { CREDIT_RATES } from '../data/creditRates';
 import ActivityInput from './ActivityInput';
 import { COMMON_USE_CASES } from '../data/questionBank';
-import { HelpCircle, Settings } from 'lucide-react';
+import { HelpCircle, Settings, Send } from 'lucide-react';
+import VerificationModal from './VerificationModal';
 
 interface WorkloadFormProps {
   workload: Workload;
@@ -12,6 +13,7 @@ interface WorkloadFormProps {
 
 const WorkloadForm: React.FC<WorkloadFormProps> = ({ workload, onChange }) => {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   const handleActivityChange = (activity: CreditActivity, count: number) => {
     onChange({
@@ -185,6 +187,23 @@ const WorkloadForm: React.FC<WorkloadFormProps> = ({ workload, onChange }) => {
           );
         })}
       </div>
+
+      <div className="flex justify-center mt-6">
+        <button
+          onClick={() => setShowVerificationModal(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors duration-200"
+        >
+          <Send size={16} />
+          <span>Verify with Lyzr API</span>
+        </button>
+      </div>
+
+      {showVerificationModal && (
+        <VerificationModal
+          workload={workload}
+          onClose={() => setShowVerificationModal(false)}
+        />
+      )}
     </div>
   );
 };
