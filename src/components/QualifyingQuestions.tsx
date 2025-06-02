@@ -399,7 +399,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
                 <p className="text-sm text-gray-600">
                   {
                     !answers[question.id] ? 'Drag the slider to select complexity level' :
-                    parseInt(answers[question.id]) === 1 ? 'Straightforward questions with direct answers like "What's the weather?" or "Who is the CEO?"' :
+                    parseInt(answers[question.id]) === 1 ? 'Straightforward questions with direct answers like "What\'s the weather?" or \"Who is the CEO?"' :
                     parseInt(answers[question.id]) === 2 ? 'Simple analysis tasks like summarizing text or classifying basic information.' :
                     parseInt(answers[question.id]) === 3 ? 'Tasks requiring multiple steps of thinking, like creating a plan or analyzing data trends.' :
                     parseInt(answers[question.id]) === 4 ? 'Detailed analysis requiring specialized knowledge, like legal document review or financial analysis.' :
