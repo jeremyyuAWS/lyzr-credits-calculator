@@ -46,7 +46,7 @@ const ApiIntegration: React.FC<ApiIntegrationProps> = ({
   -H 'Content-Type: application/json' \\
   -H 'x-api-key: ${import.meta.env.VITE_LYZR_API_KEY || 'YOUR_API_KEY'}' \\
   -d '{
-    "user_id": "${import.meta.env.VITE_USER_ID || 'YOUR_USER_ID'}",
+    "user_id": "jeremy@lyzr.ai",
     "agent_id": "683dbd69c6b0207f29f2432f",
     "session_id": "683dbd69c6b0207f29f2432f-${Math.random().toString(36).substring(2, 10)}",
     "message": ${JSON.stringify(JSON.stringify(requestPayload))}
@@ -67,7 +67,6 @@ const ApiIntegration: React.FC<ApiIntegrationProps> = ({
 
     const requestPayload = generateRequestPayload();
     const apiKey = import.meta.env.VITE_LYZR_API_KEY;
-    const userId = import.meta.env.VITE_USER_ID;
     
     try {
       const response = await fetch('https://agent-dev.test.studio.lyzr.ai/v3/inference/chat/', {
@@ -77,7 +76,7 @@ const ApiIntegration: React.FC<ApiIntegrationProps> = ({
           'x-api-key': apiKey
         },
         body: JSON.stringify({
-          user_id: userId,
+          user_id: "jeremy@lyzr.ai",
           agent_id: "683dbd69c6b0207f29f2432f",
           session_id: `683dbd69c6b0207f29f2432f-${Math.random().toString(36).substring(2, 10)}`,
           message: JSON.stringify(requestPayload)
