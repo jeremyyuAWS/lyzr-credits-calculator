@@ -965,7 +965,7 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
             <span>Back</span>
           </button>
         ) : (
-          <div></div> {/* Empty div to maintain flex layout */}
+          <div />
         )}
         
         <button
