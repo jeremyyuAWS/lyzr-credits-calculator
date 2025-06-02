@@ -215,10 +215,10 @@ const QualifyingQuestions: React.FC<QualifyingQuestionsProps> = ({
             className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 transition-colors"
           >
             <option value="">Select input size...</option>
-            <option value="small">Small (few sentences, < 1k tokens)</option>
+            <option value="small">Small (few sentences, &lt; 1k tokens)</option>
             <option value="medium">Medium (paragraphs, 1k-5k tokens)</option>
             <option value="large">Large (documents, 5k-10k tokens)</option>
-            <option value="very_large">Very Large (multiple documents, > 10k tokens)</option>
+            <option value="very_large">Very Large (multiple documents, &gt; 10k tokens)</option>
           </select>
         );
       
